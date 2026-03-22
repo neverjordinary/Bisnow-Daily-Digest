@@ -89,6 +89,26 @@ function scoreColor(score) {
   return "#EF4444";
 }
 
+function buildProposalUrl(company, contacts, products, bestFitEvents, score) {
+  const params = new URLSearchParams();
+  params.set("company", company.name || "");
+  params.set("hq", company.hq || "");
+  params.set("cre_relevance", company.cre_relevance || "");
+  if (contacts.length > 0) {
+    params.set("contact_name", contacts[0].name || "");
+    params.set("contact_title", contacts[0].title || "");
+    params.set("contact_email", contacts[0].email || "");
+  }
+  if (products.length > 0) {
+    params.set("products", products.map(p => `${p.product}|${p.price}`).join(","));
+  }
+  if (bestFitEvents.length > 0) {
+    params.set("events", bestFitEvents.map(e => `${e.event_name}|${e.date}`).join(","));
+  }
+  params.set("score", String(score));
+  return `https://neverjordinary.github.io/Bisnow-Daily-Digest/proposal.html?${params.toString()}`;
+}
+
 function getUpcomingEvents(n = 5) {
   const now = new Date();
   return FLORIDA_EVENTS.filter(e => new Date(e.date) > now)
@@ -299,10 +319,15 @@ function buildEmailHtml(meetings, researchData) {
 
   <!-- National Opportunity -->
   ${r.national_opportunity ? `
-  <div style="padding:10px 14px;background:#0c1a2e;border-radius:8px;border:1px solid #1e3a5f;">
+  <div style="padding:10px 14px;background:#0c1a2e;border-radius:8px;border:1px solid #1e3a5f;margin-bottom:16px;">
     <div style="color:#3B82F6;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;">&#127760; NATIONAL OPPORTUNITY</div>
     <div style="color:#CBD5E1;font-size:13px;line-height:1.4;">${r.national_opportunity}</div>
   </div>` : ""}
+
+  <!-- Generate Proposal Button -->
+  <div style="text-align:center;padding-top:8px;">
+    <a href="${buildProposalUrl(company, contacts, products, events, score)}" target="_blank" style="display:inline-block;background:${BISNOW_ORANGE};color:white;font-size:14px;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none;letter-spacing:0.5px;">&#128196; Generate Proposal</a>
+  </div>
 
   </div>
 </div>`;

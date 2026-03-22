@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bisnow Sponsorship Proposal</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0B0F1A; color: #F8FAFC; font-family: Arial, Helvetica, sans-serif; min-height: 100vh; }
+  .container { max-width: 800px; margin: 0 auto; padding: 24px; }
+  .header { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid #F37021; }
+  .logo { background: #F37021; color: white; font-weight: 800; font-size: 14px; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; }
+  .header-title { color: white; font-size: 22px; font-weight: 800; }
+  .section { background: #111827; border: 1px solid #1E293B; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .section-title { color: #94A3B8; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; }
+  label { display: block; color: #94A3B8; font-size: 12px; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  input, textarea, select { width: 100%; background: #0f1923; border: 1px solid #1E293B; border-radius: 6px; color: #F8FAFC; font-size: 14px; padding: 10px 12px; margin-bottom: 14px; font-family: inherit; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: #F37021; }
+  textarea { min-height: 80px; resize: vertical; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .product-row { display: grid; grid-template-columns: 1fr 120px 60px; gap: 8px; align-items: end; margin-bottom: 8px; }
+  .product-row button { background: #EF4444; color: white; border: none; border-radius: 6px; padding: 10px; cursor: pointer; font-size: 14px; margin-bottom: 14px; }
+  .product-row button:hover { background: #DC2626; }
+  .add-btn { background: none; border: 1px dashed #1E293B; color: #94A3B8; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 13px; width: 100%; margin-bottom: 14px; }
+  .add-btn:hover { border-color: #F37021; color: #F37021; }
+  .total-row { display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid #1E293B; margin-top: 8px; }
+  .total-label { color: white; font-size: 16px; font-weight: 700; }
+  .total-value { color: #F37021; font-size: 22px; font-weight: 800; font-family: monospace; }
+  .btn-group { display: flex; gap: 12px; margin-top: 24px; }
+  .btn { flex: 1; padding: 14px 24px; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; text-align: center; }
+  .btn-primary { background: #F37021; color: white; }
+  .btn-primary:hover { background: #e0601a; }
+  .btn-secondary { background: #1E293B; color: #F8FAFC; }
+  .btn-secondary:hover { background: #334155; }
+  .score-badge { display: inline-block; width: 48px; height: 48px; border-radius: 50%; text-align: center; line-height: 42px; font-size: 16px; font-weight: 800; font-family: monospace; }
+  .score-green { border: 3px solid #22C55E; color: #22C55E; }
+  .score-yellow { border: 3px solid #EAB308; color: #EAB308; }
+  .score-red { border: 3px solid #EF4444; color: #EF4444; }
+  .company-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .company-name { color: white; font-size: 24px; font-weight: 800; }
+  @media print {
+    body { background: white; color: #111; }
+    .container { max-width: 100%; }
+    .section { border: 1px solid #ddd; background: #fafafa; }
+    input, textarea, select { border: 1px solid #ccc; background: white; color: #111; }
+    .btn-group, .add-btn, .product-row button { display: none; }
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <div class="logo">BISNOW</div>
+  <div class="header-title">Sponsorship Proposal Generator</div>
+</div>
+
+<!-- Company & Contact -->
+<div class="section">
+  <div class="section-title">PROSPECT DETAILS</div>
+  <div class="company-header">
+    <div id="scoreBadge" class="score-badge score-green">0</div>
+    <input type="text" id="companyName" placeholder="Company Name" style="font-size:20px;font-weight:800;margin-bottom:0;">
+  </div>
+  <div class="row">
+    <div><label>Contact Name</label><input type="text" id="contactName" placeholder="John Smith"></div>
+    <div><label>Contact Title</label><input type="text" id="contactTitle" placeholder="VP of Marketing"></div>
+  </div>
+  <div class="row">
+    <div><label>Contact Email</label><input type="email" id="contactEmail" placeholder="john@company.com"></div>
+    <div><label>HQ Location</label><input type="text" id="companyHq" placeholder="Miami, FL"></div>
+  </div>
+  <div><label>CRE Relevance</label><textarea id="creRelevance" placeholder="How this company relates to commercial real estate..."></textarea></div>
+</div>
+
+<!-- Events -->
+<div class="section">
+  <div class="section-title">RECOMMENDED EVENTS</div>
+  <div id="eventsContainer"></div>
+  <button class="add-btn" onclick="addEvent()">+ Add Event</button>
+</div>
+
+<!-- Products / Pricing -->
+<div class="section">
+  <div class="section-title">PROPOSED PRODUCTS &amp; PRICING</div>
+  <div id="productsContainer"></div>
+  <button class="add-btn" onclick="addProduct()">+ Add Product</button>
+  <div class="total-row">
+    <div class="total-label">Total Proposal Value</div>
+    <div class="total-value" id="totalValue">$0</div>
+  </div>
+</div>
+
+<!-- Custom Notes -->
+<div class="section">
+  <div class="section-title">PROPOSAL NOTES</div>
+  <div><label>Opening / Personalization</label><textarea id="opening" rows="3" placeholder="Reference recent news, meeting context, or mutual connections..."></textarea></div>
+  <div><label>Value Proposition</label><textarea id="valueProp" rows="3" placeholder="Why Bisnow events are the right fit for this prospect..."></textarea></div>
+  <div><label>Terms &amp; Conditions</label><textarea id="terms" rows="2" placeholder="Payment terms, deadlines, special offers..."></textarea></div>
+</div>
+
+<!-- Actions -->
+<div class="btn-group no-print">
+  <button class="btn btn-secondary" onclick="copyAsText()">Copy as Text</button>
+  <button class="btn btn-secondary" onclick="window.print()">Print / PDF</button>
+  <button class="btn btn-primary" onclick="generateEmailDraft()">Open as Email Draft</button>
+</div>
+
+</div>
+
+<script>
+// ── Parse URL params and populate ──────────────────────────────────
+const params = new URLSearchParams(window.location.search);
+
+function setVal(id, key) {
+  const v = params.get(key);
+  if (v) document.getElementById(id).value = v;
+}
+
+setVal("companyName", "company");
+setVal("companyHq", "hq");
+setVal("creRelevance", "cre_relevance");
+setVal("contactName", "contact_name");
+setVal("contactTitle", "contact_title");
+setVal("contactEmail", "contact_email");
+
+const score = parseInt(params.get("score") || "0", 10);
+const badge = document.getElementById("scoreBadge");
+badge.textContent = score;
+badge.className = "score-badge " + (score >= 70 ? "score-green" : score >= 40 ? "score-yellow" : "score-red");
+
+// ── Products ───────────────────────────────────────────────────────
+const PRODUCT_OPTIONS = [
+  "Presenting Sponsor — $22,500",
+  "Whole Panel Buyout — $17,500",
+  "Panelist — $7,350",
+  "Exhibitor Booth — $2,350",
+  "SoFla Brief Takeover — $2,250",
+  "Lead Ad — $1,500",
+  "Dedicated Email — $6,500",
+  "Custom Article — $5,750",
+];
+
+let productCount = 0;
+
+function addProduct(name, price) {
+  productCount++;
+  const id = productCount;
+  const container = document.getElementById("productsContainer");
+  const row = document.createElement("div");
+  row.className = "product-row";
+  row.id = `product-${id}`;
+  row.innerHTML = `
+    <div>
+      <label>Product</label>
+      <select onchange="updateTotal()" class="prod-select">
+        <option value="">Custom...</option>
+        ${PRODUCT_OPTIONS.map(o => {
+          const [n, p] = o.split(" — ");
+          return `<option value="${o}" ${name && o.startsWith(name) ? "selected" : ""}>${o}</option>`;
+        }).join("")}
+      </select>
+    </div>
+    <div>
+      <label>Price</label>
+      <input type="text" class="prod-price" value="${price || ""}" placeholder="$0" oninput="updateTotal()">
+    </div>
+    <button onclick="removeProduct(${id})">&#10005;</button>
+  `;
+  container.appendChild(row);
+
+  // Auto-fill price from selection
+  const select = row.querySelector(".prod-select");
+  const priceInput = row.querySelector(".prod-price");
+  if (select.value && !price) {
+    const p = select.value.split("$")[1];
+    if (p) priceInput.value = "$" + p.replace(/,/g, "");
+  }
+  select.addEventListener("change", () => {
+    const p = select.value.split("$")[1];
+    if (p) priceInput.value = "$" + p.replace(/,/g, "");
+    updateTotal();
+  });
+
+  updateTotal();
+}
+
+function removeProduct(id) {
+  document.getElementById(`product-${id}`)?.remove();
+  updateTotal();
+}
+
+function updateTotal() {
+  const prices = document.querySelectorAll(".prod-price");
+  let total = 0;
+  prices.forEach(p => {
+    total += parseFloat((p.value || "").replace(/[^0-9.]/g, "")) || 0;
+  });
+  document.getElementById("totalValue").textContent = "$" + total.toLocaleString();
+}
+
+// Parse products from URL
+const productsParam = params.get("products");
+if (productsParam) {
+  productsParam.split(",").forEach(p => {
+    const [name, price] = p.split("|");
+    if (name) addProduct(name.trim(), price?.trim() || "");
+  });
+} else {
+  addProduct();
+}
+
+// ── Events ─────────────────────────────────────────────────────────
+let eventCount = 0;
+
+function addEvent(name, date) {
+  eventCount++;
+  const id = eventCount;
+  const container = document.getElementById("eventsContainer");
+  const row = document.createElement("div");
+  row.className = "row";
+  row.id = `event-${id}`;
+  row.style.marginBottom = "8px";
+  row.innerHTML = `
+    <div><label>Event Name</label><input type="text" value="${name || ""}" placeholder="South Florida Architecture..."></div>
+    <div style="display:grid;grid-template-columns:1fr 40px;gap:8px;align-items:end;">
+      <div><label>Date</label><input type="text" value="${date || ""}" placeholder="2026-04-23"></div>
+      <button onclick="document.getElementById('event-${id}').remove()" style="background:#EF4444;color:white;border:none;border-radius:6px;padding:10px;cursor:pointer;font-size:14px;margin-bottom:14px;">&#10005;</button>
+    </div>
+  `;
+  container.appendChild(row);
+}
+
+const eventsParam = params.get("events");
+if (eventsParam) {
+  eventsParam.split(",").forEach(e => {
+    const [name, date] = e.split("|");
+    if (name) addEvent(name.trim(), date?.trim() || "");
+  });
+} else {
+  addEvent();
+}
+
+// ── Export functions ────────────────────────────────────────────────
+function getProposalText() {
+  const company = document.getElementById("companyName").value || "Prospect";
+  const contact = document.getElementById("contactName").value || "";
+  const title = document.getElementById("contactTitle").value || "";
+  const opening = document.getElementById("opening").value || "";
+  const valueProp = document.getElementById("valueProp").value || "";
+  const terms = document.getElementById("terms").value || "";
+
+  let text = `BISNOW SPONSORSHIP PROPOSAL\n`;
+  text += `${"=".repeat(40)}\n\n`;
+  text += `Prepared for: ${company}\n`;
+  if (contact) text += `Contact: ${contact}${title ? ` — ${title}` : ""}\n`;
+  text += `Date: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}\n`;
+  text += `Match Score: ${score}/100\n\n`;
+
+  if (opening) text += `${opening}\n\n`;
+
+  // Events
+  const eventRows = document.querySelectorAll("[id^='event-']");
+  if (eventRows.length > 0) {
+    text += `RECOMMENDED EVENTS\n${"-".repeat(30)}\n`;
+    eventRows.forEach(row => {
+      const inputs = row.querySelectorAll("input");
+      if (inputs[0]?.value) text += `• ${inputs[0].value}${inputs[1]?.value ? ` (${inputs[1].value})` : ""}\n`;
+    });
+    text += "\n";
+  }
+
+  // Products
+  const selects = document.querySelectorAll(".prod-select");
+  const prices = document.querySelectorAll(".prod-price");
+  if (selects.length > 0) {
+    text += `PROPOSED INVESTMENT\n${"-".repeat(30)}\n`;
+    selects.forEach((s, i) => {
+      const name = s.value ? s.value.split(" — ")[0] : "Custom";
+      const price = prices[i]?.value || "";
+      if (name || price) text += `• ${name}: ${price}\n`;
+    });
+    text += `\nTotal: ${document.getElementById("totalValue").textContent}\n\n`;
+  }
+
+  if (valueProp) text += `VALUE PROPOSITION\n${"-".repeat(30)}\n${valueProp}\n\n`;
+  if (terms) text += `TERMS\n${"-".repeat(30)}\n${terms}\n\n`;
+
+  text += `---\nBisnow | Florida Events\njordan.hinsch@bisnow.com\n`;
+  return text;
+}
+
+function copyAsText() {
+  const text = getProposalText();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector(".btn-secondary");
+    const orig = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+function generateEmailDraft() {
+  const contact = document.getElementById("contactName").value || "there";
+  const company = document.getElementById("companyName").value || "";
+  const email = document.getElementById("contactEmail").value || "";
+  const subject = encodeURIComponent(`Bisnow Sponsorship Opportunity — ${company}`);
+  const body = encodeURIComponent(getProposalText());
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+}
+</script>
+</body>
+</html>
