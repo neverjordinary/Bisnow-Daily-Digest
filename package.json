@@ -1,0 +1,21 @@
+{
+  "name": "bisnow-daily-digest",
+  "version": "1.0.0",
+  "description": "Automated daily sales intelligence digest for Bisnow Florida",
+  "type": "module",
+  "main": "digest.mjs",
+  "scripts": {
+    "start": "node digest.mjs",
+    "test": "node digest.mjs --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:46609/git/neverjordinary/Bisnow-Daily-Digest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cron": "^4.4.0"
+  }
+}
