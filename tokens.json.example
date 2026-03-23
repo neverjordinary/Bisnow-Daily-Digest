@@ -1,0 +1,21 @@
+{
+  "gcal": {
+    "access_token": "ya29.xxx",
+    "refresh_token": "1//xxx",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "client_id": "xxx.apps.googleusercontent.com",
+    "client_secret": "xxx",
+    "expiry": "2026-01-01T00:00:00.000Z"
+  },
+  "gmail": {
+    "access_token": "ya29.xxx",
+    "refresh_token": "1//xxx",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "client_id": "xxx.apps.googleusercontent.com",
+    "client_secret": "xxx",
+    "expiry": "2026-01-01T00:00:00.000Z"
+  },
+  "zoominfo": {
+    "access_token": "xxx"
+  }
+}

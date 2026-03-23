@@ -1,4 +1,5 @@
 import { CronJob } from 'cron';
+import { readFileSync, writeFileSync } from 'fs';
 
 // ── Configuration ──────────────────────────────────────────────────
 const JORDAN_EMAIL = "jordan.hinsch@bisnow.com";
@@ -32,6 +33,94 @@ const FLORIDA_EVENTS = [
   { date: "2026-11-17", name: "South Florida Multifamily Summit", format: "Morning", panels: 4, venue: "TBD" },
   { date: "2026-12-01", name: "Palm Beach State of the Market", format: "Full Day", panels: 6, venue: "Palm Beach County" },
 ];
+
+// ── OAuth Token Management ────────────────────────────────────────
+function loadTokens() {
+  try {
+    const data = readFileSync(new URL('./tokens.json', import.meta.url), 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    return {};
+  }
+}
+
+function saveTokens(tokens) {
+  writeFileSync(new URL('./tokens.json', import.meta.url), JSON.stringify(tokens, null, 2));
+}
+
+async function refreshGoogleToken(tokenData) {
+  if (!tokenData.refresh_token || !tokenData.client_id || !tokenData.client_secret || !tokenData.token_uri) {
+    return tokenData;
+  }
+
+  // Check if token is expired
+  if (tokenData.expiry) {
+    const expiryDate = new Date(tokenData.expiry);
+    const now = new Date();
+    // Refresh if expiring within 5 minutes
+    if (expiryDate.getTime() - now.getTime() > 5 * 60 * 1000) {
+      return tokenData; // Still valid
+    }
+  }
+
+  console.log("Refreshing Google OAuth token...");
+  const res = await fetch(tokenData.token_uri, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: tokenData.refresh_token,
+      client_id: tokenData.client_id,
+      client_secret: tokenData.client_secret,
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error(`Token refresh failed (${res.status}): ${errText}`);
+    return tokenData;
+  }
+
+  const data = await res.json();
+  tokenData.access_token = data.access_token;
+  if (data.refresh_token) tokenData.refresh_token = data.refresh_token;
+  // Set expiry based on expires_in (seconds)
+  if (data.expires_in) {
+    tokenData.expiry = new Date(Date.now() + data.expires_in * 1000).toISOString();
+  }
+  console.log("Token refreshed successfully.");
+  return tokenData;
+}
+
+async function refreshTokensIfNeeded() {
+  const tokens = loadTokens();
+  let updated = false;
+
+  for (const key of ["gcal", "gmail"]) {
+    if (tokens[key]?.refresh_token) {
+      const refreshed = await refreshGoogleToken(tokens[key]);
+      if (refreshed.access_token !== tokens[key].access_token) {
+        tokens[key] = refreshed;
+        updated = true;
+      }
+    }
+  }
+
+  if (updated) {
+    saveTokens(tokens);
+  }
+}
+
+function getMcpServers(keys) {
+  const tokens = loadTokens();
+  return keys.map(key => {
+    const server = { ...MCP_SERVERS[key] };
+    if (tokens[key]?.access_token) {
+      server.authorization_token = tokens[key].access_token;
+    }
+    return server;
+  });
+}
 
 // ── Anthropic API Helper ───────────────────────────────────────────
 async function callClaude(systemPrompt, userMessage, mcpServers = [], useWebSearch = false) {
@@ -121,7 +210,7 @@ async function fetchCalendar() {
   const res = await callClaude(
     `You are a calendar assistant. Fetch today's events for jordan.hinsch@bisnow.com. Return ONLY a valid JSON array of events that have at least one attendee whose email does NOT end in @bisnow.com, @biscred.com, or @selectleaders.com. Structure: [{"title":"","start_time":"9:00 AM","end_time":"","location":"","description":"","external_attendees":[{"email":"","name":""}]}]. If no external meetings, return []. JSON only, no markdown.`,
     "Get all events for today, filter to external attendees only. Return JSON.",
-    [MCP_SERVERS.gcal]
+    getMcpServers(["gcal"])
   );
 
   const allText = [...res.texts, ...res.toolResults].join("\n");
@@ -156,7 +245,7 @@ TARGET AUDIENCE: GC->developers,owners | Developer->LP investors,equity | Lender
 
 Return ONLY valid JSON: {"contacts":[{"name":"","title":"","company":"","linkedin_url":"","email":""}],"company":{"name":"","description":"","hq":"","cre_relevance":"","florida_presence":""},"sponsorship_intel":{"past_cre_sponsorships":[{"event":"","url":""}],"advertising_evidence":[],"past_bisnow_sponsor":false},"recent_news":[{"headline":"","summary":"","url":"","date":"","mapped_bisnow_event":null,"mapped_event_date":null}],"match_score":0,"match_reasoning":"","best_fit_events":[{"event_name":"","date":"","venue":"","why":""}],"recommended_products":[{"product":"","price":"","rationale":""}],"national_opportunity":null,"target_audience":{"primary":[],"secondary":[],"pitch_rationale":""},"icebreaker":""}`,
     `Research: Meeting "${mtg.title}" at ${mtg.start_time}. Contacts: ${contactList}. Find LinkedIn, company overview, sponsorship history, recent news mapped to Bisnow events, match score, target audience, recommendations, icebreaker.`,
-    [MCP_SERVERS.zoominfo],
+    getMcpServers(["zoominfo"]),
     true
   );
 
@@ -374,7 +463,7 @@ Subject: ${subject}
 Content-Type: text/html
 
 ${htmlBody}`,
-    [MCP_SERVERS.gmail]
+    getMcpServers(["gmail"])
   );
   console.log("Email sent!");
   return res;
@@ -408,6 +497,9 @@ async function runDigest() {
   console.log(`${"=".repeat(50)}\n`);
 
   try {
+    // Refresh Google tokens if expired
+    await refreshTokensIfNeeded();
+
     // Step 1: Calendar
     const meetings = await fetchCalendar();
     console.log(`Found ${meetings.length} external meeting(s)\n`);
